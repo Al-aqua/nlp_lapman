@@ -1,6 +1,9 @@
 [book]
 authors = ["Al-aqua"]
-language = "en"
+language = "ar"
 multilingual = false
 src = "src"
 title = "Natural Language Processing"
+
+[output.html]
+additional-css = ["theme/watermark.css"]
