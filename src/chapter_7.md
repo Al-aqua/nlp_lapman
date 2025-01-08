@@ -4,28 +4,27 @@
 
 الشبكات العصبية للمعالجة الطبيعية للغات (NLP).
 
----
+______________________________________________________________________
 
 ## ثانيا: المحتوى
 
 ### العنوان: الشبكات العصبية للمعالجة الطبيعية للغات
 
----
+______________________________________________________________________
 
 ### الموضوع الرئيسي من توصيف النظري:
 
-فهم كيفية استخدام الشبكات العصبية لتطبيقات المعالجة الطبيعية للغات مثل تصنيف النصوص، وتحليل المشاعر، وإنشاء النصوص.
+فهم كيفية استخدام الشبكات العصبية لتطبيقات المعالجة الطبيعية للغات مثل تصنيف النصوص، وتحليل المشاعر.
 
----
+______________________________________________________________________
 
 ### أهداف المعمل
 
 يسعى التطبيق العملي لتحقيق الأهداف التالية:
 
-1. تطبيق نموذج لتحليل المشاعر باستخدام شبكة عصبية متكررة (RNN) مثل LSTM أو GRU.
-1. كتابة برنامج يتفاعل مع نموذج لغوي لإنتاج نصوص منطقية ومتسقة بناءً على مدخلات من المستخدم.
+تطبيق نموذج لتحليل المشاعر باستخدام شبكة عصبية متكررة (RNN) مثل LSTM أو GRU.
 
----
+______________________________________________________________________
 
 ### الأدوات
 
@@ -33,16 +32,15 @@
 - Python.
 - TensorFlow أو PyTorch.
 - مكتبات numpy و pandas لمعالجة البيانات.
-- NLTK لاستخراج المعاني اللغوية.
 
----
+______________________________________________________________________
 
 ### المحتوى
 
 - **المسألة/المسائل:**
 
   1. تنفيذ نموذج تحليل مشاعر باستخدام RNN بناءً على مكتبات التعلم العميق.
-  1. كتابة برنامج يولد نصوصاً منطقية وموافقة للسياق بناءً على مدخلات المستخدم.
+  1. تصنيف النصوص باستخدام نموذج ثنائي الطبقات (Bi-LSTM) ونموذج ثنائي العصبية (RNN).
 
 - **التطبيقات:**
 
@@ -102,13 +100,28 @@ model.fit(X, y, epochs=10, batch_size=2)
 # Evaluate the model
 loss, accuracy = model.evaluate(X, y)
 print("Accuracy:", accuracy)
+
+# Test the model with new samples
+test_texts = [
+    "This is a fantastic product!",
+    "I hate this experience."
+]
+
+# Tokenize and pad the test samples
+test_sequences = tokenizer.texts_to_sequences(test_texts)
+test_X = pad_sequences(test_sequences, maxlen=max_length, padding='post')
+
+# Predict sentiments
+predictions = model.predict(test_X)
+for text, pred in zip(test_texts, predictions):
+    print(f"Text: {text}\nPredicted Sentiment: {'Positive' if pred > 0.5 else 'Negative'}\n")
 ```
 
 المخرجات: عرض دقة النموذج في تحليل المشاعر.
 
----
+______________________________________________________________________
 
-2. البرنامج الثاني: إنشاء نظام يولد نصوصاً بناءً على مدخلات المستخدم
+2. البرنامج الثاني: تصنيف النصوص باستخدام نموذج ثنائي الطبقات (Bi-LSTM)
 
 الشفرة:
 
@@ -117,35 +130,55 @@ pip install torch
 ```
 
 ```python
-import torch
-from transformers import GPT2LMHeadModel, GPT2Tokenizer
+import numpy as np
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Embedding, Bidirectional, LSTM, Dense
+from tensorflow.keras.preprocessing.text import Tokenizer
+from tensorflow.keras.preprocessing.sequence import pad_sequences
 
-# Load the pre-trained model and tokenizer
-tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
-model = GPT2LMHeadModel.from_pretrained("gpt2")
+# بيانات افتراضية
+data = {
+    "text": [
+        "I enjoy learning NLP.",
+        "The course is challenging but rewarding.",
+        "I do not like ambiguous examples."
+    ],
+    "sentiment": [1, 1, 0]  # 1: إيجابي، 0: سلبي
+}
 
-# Generate text based on user input
-prompt = "Once upon a time in a small village"
-inputs = tokenizer.encode(prompt, return_tensors="pt")
-outputs = model.generate(inputs, max_length=50, num_return_sequences=1, no_repeat_ngram_size=2, top_k=50, top_p=0.95, temperature=0.7)
+# توكنيزة النصوص
+tokenizer = Tokenizer()
+tokenizer.fit_on_texts(data["text"])
+sequences = tokenizer.texts_to_sequences(data["text"])
+word_index = tokenizer.word_index
 
-generated_text = tokenizer.decode(outputs[0], skip_special_tokens=True)
-print("Generated Text:")
-print(generated_text)
+# تجهيز البيانات للإدخال
+max_length = max(len(seq) for seq in sequences)
+X = pad_sequences(sequences, maxlen=max_length, padding='post')
+y = np.array(data["sentiment"])
+
+# بناء النموذج
+model = Sequential([
+    Embedding(input_dim=len(word_index) + 1, output_dim=16, input_length=max_length),
+    Bidirectional(LSTM(32)),
+    Dense(1, activation='sigmoid')
+])
+
+model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+
+# تدريب النموذج
+model.fit(X, y, epochs=10, batch_size=2)
+
+# تقييم النموذج
+loss, accuracy = model.evaluate(X, y)
+print("Accuracy:", accuracy)
 ```
 
-المخرجات: نصوص منطقية ومتسقة تُنتج بناءً على المدخلات النصية.
+المخرجات: نموذج يمكنه توقع مشاعر النصوص باستخدام نموذج RNN ثنائي الاتجاه لزيادة دقة التنبؤ.
 
----
+______________________________________________________________________
 
 ### التكاليف
 
-1. تحسين نموذج تحليل المشاعر:
-
-   1. استخدام مجموعة بيانات أكبر وأكثر تنوعاً.
-   1. تحسين معمارية النموذج باستخدام GRU بدلاً من LSTM.
-
-1. توسيع نظام توليد النصوص:
-
-   1. تجربة مدخلات متنوعة.
-   1. مقارنة نتائج النماذج المختلفة مثل GPT-3 أو BERT.
+1. تجربة نموذج LSTM ونموذج GRU لمعرفة أيهما يقدم أداءً أفضل على نفس البيانات.
+1. مقارنة نتائج تصنيف المشاعر بين Bi-LSTM وRNN التقليدية.
