@@ -4,19 +4,19 @@
 
 الشبكات العصبية للمعالجة الطبيعية للغات (NLP).
 
-______________________________________________________________________
+---
 
 ## ثانيا: المحتوى
 
 ### العنوان: الشبكات العصبية للمعالجة الطبيعية للغات
 
-______________________________________________________________________
+---
 
 ### الموضوع الرئيسي من توصيف النظري:
 
 فهم كيفية استخدام الشبكات العصبية لتطبيقات المعالجة الطبيعية للغات مثل تصنيف النصوص، وتحليل المشاعر.
 
-______________________________________________________________________
+---
 
 ### أهداف المعمل
 
@@ -24,7 +24,7 @@ ______________________________________________________________________
 
 تطبيق نموذج لتحليل المشاعر باستخدام شبكة عصبية متكررة (RNN) مثل LSTM أو GRU.
 
-______________________________________________________________________
+---
 
 ### الأدوات
 
@@ -33,7 +33,7 @@ ______________________________________________________________________
 - TensorFlow أو PyTorch.
 - مكتبات numpy و pandas لمعالجة البيانات.
 
-______________________________________________________________________
+---
 
 ### المحتوى
 
@@ -68,9 +68,15 @@ data = {
         "This is the worst service I've ever had.",
         "The experience was amazing.",
         "I do not recommend this at all.",
-        "Absolutely fantastic!"
+        "Absolutely fantastic!",
+        "This place is horrible.",
+        "I hate this place!",
+        "The service was terrible.",
+        "I do not recommend this at all.",
+        "Absolutely fantastic!",
+        "It was really good.",
     ],
-    "sentiment": [1, 0, 1, 0, 1]  # 1 for positive, 0 for negative
+    "sentiment": [1, 0, 1, 0, 1, 0, 0, 0, 0, 1, 1]  # 1 for positive, 0 for negative
 }
 df = pd.DataFrame(data)
 
@@ -104,7 +110,10 @@ print("Accuracy:", accuracy)
 # Test the model with new samples
 test_texts = [
     "This is a fantastic product!",
-    "I hate this experience."
+    "I hate this place!",
+    "The service was terrible.",
+    "I do not recommend this at all.",
+    "Absolutely fantastic!"
 ]
 
 # Tokenize and pad the test samples
@@ -119,7 +128,7 @@ for text, pred in zip(test_texts, predictions):
 
 المخرجات: عرض دقة النموذج في تحليل المشاعر.
 
-______________________________________________________________________
+---
 
 2. البرنامج الثاني: تصنيف النصوص باستخدام نموذج ثنائي الطبقات (Bi-LSTM)
 
@@ -139,11 +148,19 @@ from tensorflow.keras.preprocessing.sequence import pad_sequences
 # بيانات افتراضية
 data = {
     "text": [
-        "I enjoy learning NLP.",
-        "The course is challenging but rewarding.",
-        "I do not like ambiguous examples."
+        "I love this product!",
+        "This is the worst service I've ever had.",
+        "The experience was amazing.",
+        "I do not recommend this at all.",
+        "Absolutely fantastic!",
+        "This place is horrible.",
+        "I hate this place!",
+        "The service was terrible.",
+        "I do not recommend this at all.",
+        "Absolutely fantastic!",
+        "It was really good.",
     ],
-    "sentiment": [1, 1, 0]  # 1: إيجابي، 0: سلبي
+    "sentiment": [1, 0, 1, 0, 1, 0, 0, 0, 0, 1, 1]  # 1 for positive, 0 for negative
 }
 
 # توكنيزة النصوص
@@ -172,11 +189,30 @@ model.fit(X, y, epochs=10, batch_size=2)
 # تقييم النموذج
 loss, accuracy = model.evaluate(X, y)
 print("Accuracy:", accuracy)
+
+# Test the model with new samples
+test_texts = [
+    "This is a fantastic product!",
+    "I hate this place!",
+    "The service was terrible.",
+    "I do not recommend this at all.",
+    "Absolutely fantastic!"
+]
+
+# Tokenize and pad the test samples
+test_sequences = tokenizer.texts_to_sequences(test_texts)
+test_X = pad_sequences(test_sequences, maxlen=max_length, padding='post')
+
+# Predict sentiments
+predictions = model.predict(test_X)
+for text, pred in zip(test_texts, predictions):
+    print(f"Text: {text}\nPredicted Sentiment: {'Positive' if pred > 0.5 else 'Negative'}\n")
+
 ```
 
 المخرجات: نموذج يمكنه توقع مشاعر النصوص باستخدام نموذج RNN ثنائي الاتجاه لزيادة دقة التنبؤ.
 
-______________________________________________________________________
+---
 
 ### التكاليف
 
