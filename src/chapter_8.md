@@ -2,131 +2,135 @@
 
 ## أولا: مفردات المقرر حسب التوصيف
 
-الشبكات العصبية للمعالجة الطبيعية للغات (Neural Networks for NLP).
+مقدمة في الشبكات العصبية والتعلم العميق: التضمينات اللفظية (مثل Word2Vec و GloVe).
 
-______________________________________________________________________
+---
 
-## ثانيا: المحتوى
+## ثانياً: المحتوى
 
-### العنوان: الشبكات العصبية للمعالجة الطبيعية للغات
+### العنوان: الشبكات العصبية لمعالجة اللغات الطبيعية: التضمينات اللفظية
 
-______________________________________________________________________
+---
 
 ### الموضوع الرئيسي من توصيف النظري:
 
-استكشاف تطبيق الشبكات العصبية العميقة في معالجة اللغة الطبيعية، بما في ذلك الكشف عن الكيانات، تصنيف النصوص، واكتشاف الأنماط باستخدام الشبكات المتقدمة مثل Faster R-CNN.
+فهم أساسيات الشبكات العصبية والتعلم العميق وتطبيقها في معالجة اللغات الطبيعية، مع التركيز على التضمينات اللفظية.
 
-______________________________________________________________________
+---
 
 ### أهداف المعمل
 
 يسعى التطبيق العملي لتحقيق الأهداف التالية:
 
-1. تثبيت وتكوين بيئة عمل تدعم التعلم العميق باستخدام TensorFlow أو PyTorch.
-1. تدريب نموذج Faster R-CNN لاكتشاف الكائنات باستخدام مجموعة بيانات مُعلّمة مثل COCO أو PASCAL VOC.
+1. التعرف على مفهوم التضمينات اللفظية وأهميتها في معالجة اللغات الطبيعية.
+1. تطبيق نماذج Word2Vec و GloVe لإنشاء تضمينات لفظية.
+1. استكشاف العلاقات الدلالية بين الكلمات باستخدام التضمينات اللفظية.
+1. مقارنة أداء نماذج التضمين المختلفة في مهام معالجة اللغات الطبيعية.
 
-______________________________________________________________________
+---
 
 ### الأدوات
 
 - جهاز حاسوب.
 - Python.
-- TensorFlow أو PyTorch.
-- مكتبة OpenCV.
-- مجموعة بيانات مُعلّمة (مثل COCO أو PASCAL VOC).
+- مكتبة gensim.
+- مكتبة numpy.
+- مكتبة matplotlib.
+- مكتبة scikit-learn.
+- مجموعة بيانات نصية (مثل مجموعة أخبار أو مقالات).
 
-______________________________________________________________________
+---
 
 ### المحتوى
 
 - **المسألة/المسائل:**
 
-  1. تثبيت وتكوين بيئة عمل مناسبة للتعلم العميق.
-  1. تدريب نموذج Faster R-CNN لاكتشاف الكائنات.
+  1. إنشاء تضمينات لفظية باستخدام نموذج Word2Vec.
+  1. استخدام التضمينات اللفظية لاستكشاف العلاقات بين الكلمات.
+  1. مقارنة أداء Word2Vec و GloVe في مهمة تصنيف النصوص.
 
-- **التطبيقات:**
+- **التطبيقات**
 
-#### البرنامج الأول: تثبيت وتكوين بيئة عمل التعلم العميق
-
-الشفرة:
-
-```bash
-pip install tensorflow
-# أو
-pip install torch torchvision
-```
+1. البرنامج الأول: إنشاء تضمينات لفظية باستخدام Word2Vec
 
 ```python
-# التأكد من تثبيت TensorFlow أو PyTorch
-try:
-    import tensorflow as tf
-    print("TensorFlow is installed. Version:", tf.__version__)
-except ImportError:
-    print("TensorFlow is not installed.")
+from gensim.models import Word2Vec
+from gensim.utils import simple_preprocess
+import pandas as pd
 
-try:
-    import torch
-    print("PyTorch is installed. Version:", torch.__version__)
-except ImportError:
-    print("PyTorch is not installed.")
+# Load the data (example: news collection)
+df = pd.read_csv('Articles.csv')
+corpus = df['Article'].apply(simple_preprocess).tolist()
+
+# Train Word2Vec model
+model = Word2Vec(sentences=corpus, vector_size=100, window=5, min_count=1, workers=4)
+
+# Save the model
+model.save("word2vec.model")
+
+# Extract similar words
+similar_words = model.wv.most_similar('technology', topn=10)
+print("Words similar to 'technology':")
+for word, score in similar_words:
+    print(f"{word}: {score}")
 ```
 
-المخرجات: عرض الإطار الذي تم تثبيته بنجاح والإصدار.
+**المخرجات:** قائمة بالكلمات الأكثر تشابهًا مع كلمة "technology" بناءً على نموذج Word2Vec.
 
-______________________________________________________________________
+---
 
-#### البرنامج الثاني: تدريب نموذج Faster R-CNN لاكتشاف الكائنات
-
-الشفرة:
-
-```bash
-pip install torch torchvision opencv-python
-```
+2. البرنامج الثاني: استكشاف العلاقات بين الكلمات
 
 ```python
-import torch
-import torchvision
-from torchvision.models.detection import fasterrcnn_resnet50_fpn
-from torchvision.transforms import functional as F
-import cv2
+from gensim.models import KeyedVectors
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.manifold import TSNE
 
-# تحميل النموذج المدرب مسبقاً
-model = fasterrcnn_resnet50_fpn(pretrained=True)
-model.eval()
+# Load the saved model
+model = KeyedVectors.load("word2vec.model")
 
-# قراءة الصورة
-image = cv2.imread("sample_image.jpg")
-image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+# Choose some words for visualization
+words = [
+    'computer', 'technology', 'science', 'art', 'music',
+    'programming', 'data'
+]
 
-# تحويل الصورة إلى تنسيق مناسب
-image_tensor = F.to_tensor(image_rgb).unsqueeze(0)
+# Extract embeddings
+embeddings = np.array([model.wv[w] for w in words])
 
-# إجراء التنبؤات
-with torch.no_grad():
-    predictions = model(image_tensor)
+# Reduce dimensions using t-SNE
+tsne = TSNE(n_components=2, perplexity=5, random_state=0)
+embeddings_2d = tsne.fit_transform(embeddings)
 
-# عرض النتائج
-for element in predictions[0]['boxes']:
-    x1, y1, x2, y2 = element.int()
-    cv2.rectangle(image, (x1, y1), (x2, y2), (0, 255, 0), 2)
+# Plot the results
+plt.figure(figsize=(10, 8))
+plt.scatter(embeddings_2d[:, 0], embeddings_2d[:, 1])
 
-cv2.imshow("Object Detection", image)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+for i, word in enumerate(words):
+    plt.annotate(word, xy=(embeddings_2d[i, 0], embeddings_2d[i, 1]))
+
+plt.title("Word Embeddings Visualization")
+plt.savefig("word_embeddings_visualization.png")
 ```
 
-المخرجات: عرض الصورة مع المربعات المحيطة بالكائنات المكتشفة.
+**المخرجات:** رسم بياني يوضح العلاقات بين الكلمات المختارة في فضاء ثنائي الأبعاد.
 
-______________________________________________________________________
+---
 
 ### التكاليف
 
-1. تثبيت وتكوين بيئة العمل:
+1. تجربة تقنيات مختلفة لتحسين جودة التضمينات اللفظية:
 
-   - مقارنة الأداء بين TensorFlow و PyTorch.
-   - تحليل واجهات برمجة التطبيقات (APIs) لكل إطار عمل.
+   1. تعديل معلمات نموذج Word2Vec (مثل حجم النافذة وحجم المتجه) وملاحظة التأثير على جودة التضمينات.
+   1. استخدام تقنيات معالجة مسبقة مختلفة للنصوص وتقييم تأثيرها على التضمينات الناتجة.
 
-1. تدريب نموذج Faster R-CNN:
+1. تطبيق التضمينات اللفظية في مهمة أخرى لمعالجة اللغات الطبيعية:
 
-   - استخدام مجموعة بيانات أكبر وأكثر تنوعاً.
-   - تحسين الأداء باستخدام GPU أثناء التدريب.
+   1. استخدام التضمينات اللفظية في مهمة تحليل المشاعر.
+   1. مقارنة أداء النموذج باستخدام التضمينات اللفظية مع نموذج يستخدم تمثيلات نصية بسيطة (مثل bag-of-words).
+
+1. استكشاف نماذج تضمين متقدمة:
+
+   1. تجربة نموذج FastText وتقييم أدائه مقارنة بـ Word2Vec و GloVe.
+   1. البحث عن نماذج تضمين أحدث (مثل BERT أو ELMo) وتقديم تقرير موجز عن مزاياها وكيفية استخدامها.
